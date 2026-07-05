@@ -122,10 +122,16 @@ function getProductDetails() {
     cleanName = cleanName.replace(/[#|\\/|(|)|[|\]]/g, ' ').replace(/\s+/g, ' ').trim();
   }
 
+  let finalQuery = cleanName ? `${brand} ${cleanName}`.trim() : name;
+  // Strip dots and commas to ensure brands like "Dr.G" are tokenized properly as "Dr G"
+  if (finalQuery) {
+    finalQuery = finalQuery.replace(/[.,]/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+
   return {
     brand: brand || "Unknown Brand",
     productName: name || "Unknown Product",
-    cleanQuery: cleanName ? `${brand} ${cleanName}`.trim() : name
+    cleanQuery: finalQuery
   };
 }
 
