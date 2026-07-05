@@ -131,7 +131,8 @@ function getProductDetails() {
   return {
     brand: brand || "Unknown Brand",
     productName: name || "Unknown Product",
-    cleanQuery: finalQuery
+    cleanQuery: finalQuery,
+    cleanNameOnly: cleanName
   };
 }
 
@@ -805,6 +806,15 @@ function processSearchResponse(response) {
   }
 
   function fallbackOrError() {
+    if (!state.hasRetriedSearch && state.cleanNameOnly) {
+      state.hasRetriedSearch = true;
+      let looseQuery = state.cleanNameOnly.replace(/[.,]/g, ' ').replace(/\s+/g, ' ').trim();
+      if (looseQuery) {
+        triggerSearch(looseQuery);
+        return;
+      }
+    }
+
     if (state.rawIngredients) {
       startFallbackDecoding(state.rawIngredients);
     } else {
@@ -820,7 +830,9 @@ function startAnalysis() {
   const details = getProductDetails();
   state.brand = details.brand;
   state.productName = details.productName;
+  state.cleanNameOnly = details.cleanNameOnly;
   state.rawIngredients = getRawIngredients();
+  state.hasRetriedSearch = false;
 
   updateSidebarHeader(state.brand, state.productName);
   
