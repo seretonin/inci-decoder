@@ -419,22 +419,22 @@ function renderSidebarData() {
 
   let htmlMarkup = "";
 
-  // 1. Stats Grid
+  // 1. Stats Grid (acting as filters)
   htmlMarkup += `
     <div class="inci-summary-grid">
-      <div class="inci-summary-card superstar" title="Superstar Ingredients (Highly rated, science backed benefits)">
+      <div class="inci-summary-card superstar" data-filter="superstar" title="Superstar Ingredients (Highly rated, science backed benefits)">
         <span class="inci-summary-val">${superstarCount}</span>
         <span class="inci-summary-label">Superstars ⭐</span>
       </div>
-      <div class="inci-summary-card goodie" title="Goodie Ingredients (Healthy, nourishing elements)">
+      <div class="inci-summary-card goodie" data-filter="goodie" title="Goodie Ingredients (Healthy, nourishing elements)">
         <span class="inci-summary-val">${goodieCount}</span>
         <span class="inci-summary-label">Goodies 🍃</span>
       </div>
-      <div class="inci-summary-card icky" title="Icky Ingredients (Potentially irritating or undesirable ingredients)">
+      <div class="inci-summary-card icky" data-filter="icky" title="Icky Ingredients (Potentially irritating or undesirable ingredients)">
         <span class="inci-summary-val">${ickyCount}</span>
         <span class="inci-summary-label">Ickies ⚠️</span>
       </div>
-      <div class="inci-summary-card warn" title="Ingredients with comedogenicity >= 2 or irritancy >= 2">
+      <div class="inci-summary-card warn" data-filter="warning" title="Ingredients with comedogenicity >= 2 or irritancy >= 2">
         <span class="inci-summary-val">${warningsCount}</span>
         <span class="inci-summary-label">Warnings 🚨</span>
       </div>
@@ -509,8 +509,10 @@ function renderSidebarData() {
       statsLabels += `<span class="inci-stat-dot com" title="Comedogenicity score: ${ing.comedogenicity}">Com: ${ing.comedogenicity}</span>`;
     }
 
+    const isWarning = (!isNaN(irrVal) && irrVal > 1) || (!isNaN(comVal) && comVal >= 2) || ing.rating === "icky";
+
     htmlMarkup += `
-      <div class="inci-list-item" id="ingred-card-${ing.slug}">
+      <div class="inci-list-item" id="ingred-card-${ing.slug}" data-rating="${ing.rating || ''}" data-warning="${isWarning}">
         <div class="inci-list-item-main">
           <div class="inci-ingred-info">
             <div class="inci-badge-rating ${ing.rating || 'none'}">${ratingSymbol}</div>
@@ -533,6 +535,47 @@ function renderSidebarData() {
   htmlMarkup += `</div>`;
 
   container.innerHTML = htmlMarkup;
+
+  // Add click event listeners for filtering
+  const summaryGrid = container.querySelector(".inci-summary-grid");
+  const summaryCards = container.querySelectorAll(".inci-summary-card");
+  const listItems = container.querySelectorAll(".inci-list-item");
+
+  summaryCards.forEach(card => {
+    card.addEventListener("click", () => {
+      const filterType = card.getAttribute("data-filter");
+      
+      if (card.classList.contains("active-filter")) {
+        // If clicked active card, disable filter
+        card.classList.remove("active-filter");
+        summaryGrid.classList.remove("filtering");
+        
+        listItems.forEach(item => item.classList.remove("filtered-out"));
+      } else {
+        // Activate filter
+        summaryCards.forEach(c => c.classList.remove("active-filter"));
+        card.classList.add("active-filter");
+        summaryGrid.classList.add("filtering");
+        
+        listItems.forEach(item => {
+          const rating = item.getAttribute("data-rating");
+          const isWarning = item.getAttribute("data-warning") === "true";
+          
+          let matches = false;
+          if (filterType === "superstar" && rating === "superstar") matches = true;
+          else if (filterType === "goodie" && rating === "goodie") matches = true;
+          else if (filterType === "icky" && rating === "icky") matches = true;
+          else if (filterType === "warning" && isWarning) matches = true;
+          
+          if (matches) {
+            item.classList.remove("filtered-out");
+          } else {
+            item.classList.add("filtered-out");
+          }
+        });
+      }
+    });
+  });
 
   // Add click event listeners programmatically (CSP safe, avoids inline script blocks)
   container.querySelectorAll(".inci-accordion-header").forEach(header => {

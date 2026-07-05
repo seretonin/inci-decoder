@@ -215,12 +215,25 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
 }
 
 .inci-summary-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.inci-summary-grid.filtering .inci-summary-card:not(.active-filter) {
+  opacity: 0.45;
+  transform: scale(0.96);
+  box-shadow: none;
+}
+
+.inci-summary-card.active-filter {
+  transform: scale(1.03);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.12);
+  border-width: 2px !important;
 }
 
 .inci-summary-val {
@@ -240,10 +253,20 @@
 .inci-summary-card.icky { border-left: 4px solid #ef4444; }
 .inci-summary-card.warn { border-left: 4px solid #f59e0b; }
 
+.inci-summary-card.active-filter.superstar { border-color: #d97706 !important; }
+.inci-summary-card.active-filter.goodie { border-color: #059669 !important; }
+.inci-summary-card.active-filter.icky { border-color: #dc2626 !important; }
+.inci-summary-card.active-filter.warn { border-color: #d97706 !important; }
+
 .inci-summary-card.superstar .inci-summary-val { color: #d97706; }
 .inci-summary-card.goodie .inci-summary-val { color: #059669; }
 .inci-summary-card.icky .inci-summary-val { color: #dc2626; }
 .inci-summary-card.warn .inci-summary-val { color: #d97706; }
+
+/* Filtered list items */
+.inci-list-item.filtered-out {
+  display: none !important;
+}
 
 /* Hashtags block */
 .inci-hashtags {
