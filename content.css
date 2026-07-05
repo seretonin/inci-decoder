@@ -15,7 +15,6 @@
   box-sizing: border-box;
   transform: translateX(100%);
   transition: transform 0.4s cubic-bezier(0.075, 0.82, 0.165, 1);
-  box-shadow: -10px 0 35px rgba(0, 0, 0, 0.15);
 }
 
 #inci-decoder-sidebar.active {
