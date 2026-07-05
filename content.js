@@ -104,6 +104,7 @@ function getProductDetails() {
   if (name) {
     name = name.replace(/^Buy\s+/i, '')
                .split(/\s+in\s+Australia/i)[0]
+               .split(/\s+Australia(?:\s*-\s*|\s*$)/i)[0]
                .split(/\s*-\s*(Korean|Japanese|Asian|Skincare|Skin\s+Care|Online|Beauty|K\s+Beauty|J\s+Beauty|K-Beauty|J-Beauty|Store|Shop)/i)[0]
                .trim();
   }
