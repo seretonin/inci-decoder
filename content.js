@@ -111,7 +111,9 @@ function getProductDetails() {
   // Clean volume tags and special characters from cleanName
   let cleanName = name;
   if (cleanName) {
-    cleanName = cleanName.replace(/\b\d+(g|ml|oz|pcs|pack|pieces)\b/gi, '').trim();
+    cleanName = cleanName.replace(/\b\d+(g|ml|oz|pcs|pack|pieces)\b/gi, '')
+                         .replace(/\b(mini|refill|set)\b/gi, '')
+                         .trim();
     if (brand && cleanName.toLowerCase().startsWith(brand.toLowerCase())) {
       cleanName = cleanName.substring(brand.length).trim();
     }
