@@ -103,9 +103,8 @@ function getProductDetails() {
   // Clean name format if it contains shop descriptions
   if (name) {
     name = name.replace(/^Buy\s+/i, '')
-               .replace(/\s+in\s+Australia\s*-\s*(Korean|Japanese|Asian|Skincare|Skin\s+Care|Online|Beauty|and|&|\s)+$/i, '')
-               .replace(/\s*-\s*(Korean|Japanese|Asian|Skincare|Skin\s+Care|Online|Beauty|and|&|\s)+$/i, '')
-               .replace(/\s+Australia$/i, '')
+               .split(/\s+in\s+Australia/i)[0]
+               .split(/\s*-\s*(Korean|Japanese|Asian|Skincare|Skin\s+Care|Online|Beauty|K\s+Beauty|J\s+Beauty|K-Beauty|J-Beauty|Store|Shop)/i)[0]
                .trim();
   }
 
