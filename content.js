@@ -201,7 +201,6 @@ function injectSidebarMarkup() {
           ${icons.search}
         </button>
       </div>
-      <div class="inci-source-indicator" id="inci-source-text">Data source: INCIDecoder.com</div>
     </div>
   `;
 
@@ -605,11 +604,13 @@ function renderSidebarData() {
   });
 
   // Update source text if it's fallback
+  const sourceText = document.getElementById("inci-source-text");
   if (state.isDecodedFallback) {
-    document.getElementById("inci-source-text").innerText = "Parsed fallback via INCIDecoder direct text scan";
+    if (sourceText) sourceText.innerText = "Parsed fallback via INCIDecoder direct text scan";
     document.getElementById("inci-outlink-btn").style.display = "none";
   } else {
-    document.getElementById("inci-source-text").innerText = "Data fetched directly from INCIDecoder database";
+    if (sourceText) sourceText.innerText = "Data fetched directly from INCIDecoder database";
+    document.getElementById("inci-outlink-btn").style.display = "inline-flex";
   }
 }
 
