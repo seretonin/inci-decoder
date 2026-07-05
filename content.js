@@ -465,6 +465,9 @@ function renderSidebarData() {
     htmlMarkup += `</div>`;
   }
 
+  // 2.5 Filtered Results Container
+  htmlMarkup += `<div id="inci-filtered-results" style="display: none; margin-top: 16px; margin-bottom: 8px;"></div>`;
+
   // 3. Highlights Category Accordion
   if (data.keyIngredients && data.keyIngredients.length > 0) {
     htmlMarkup += `
@@ -556,6 +559,8 @@ function renderSidebarData() {
   const summaryCards = container.querySelectorAll(".inci-summary-card");
   const listItems = container.querySelectorAll(".inci-list-item");
 
+  const filteredContainer = container.querySelector("#inci-filtered-results");
+
   summaryCards.forEach(card => {
     card.addEventListener("click", () => {
       const filterType = card.getAttribute("data-filter");
@@ -565,12 +570,22 @@ function renderSidebarData() {
         card.classList.remove("active-filter");
         summaryGrid.classList.remove("filtering");
         
-        listItems.forEach(item => item.classList.remove("filtered-out"));
+        filteredContainer.style.display = "none";
+        filteredContainer.innerHTML = '';
       } else {
         // Activate filter
         summaryCards.forEach(c => c.classList.remove("active-filter"));
         card.classList.add("active-filter");
         summaryGrid.classList.add("filtering");
+        
+        // Clear and show filtered container
+        filteredContainer.style.display = "block";
+        const filterLabel = card.querySelector(".inci-summary-label").innerText;
+        filteredContainer.innerHTML = `
+          <div class="inci-section-title" style="margin-bottom: 8px; color: var(--accent-color);">Filtered: ${filterLabel}</div>
+          <div class="inci-list" id="inci-filtered-list"></div>
+        `;
+        const filteredList = filteredContainer.querySelector("#inci-filtered-list");
         
         listItems.forEach(item => {
           const rating = item.getAttribute("data-rating");
@@ -583,9 +598,14 @@ function renderSidebarData() {
           else if (filterType === "warning" && isWarning) matches = true;
           
           if (matches) {
-            item.classList.remove("filtered-out");
-          } else {
-            item.classList.add("filtered-out");
+            const clone = item.cloneNode(true);
+            const itemMain = clone.querySelector(".inci-list-item-main");
+            if (itemMain) {
+              itemMain.addEventListener("click", () => {
+                clone.classList.toggle("expanded");
+              });
+            }
+            filteredList.appendChild(clone);
           }
         });
       }
