@@ -103,7 +103,8 @@ function getProductDetails() {
   // Clean name format if it contains shop descriptions
   if (name) {
     name = name.replace(/^Buy\s+/i, '')
-               .replace(/\s+Australia\s*-\s*Korean\s+Skin\s+Care$/i, '')
+               .replace(/\s+in\s+Australia\s*-\s*(Korean|Japanese|Asian|Skincare|Skin\s+Care|Online|Beauty|and|&|\s)+$/i, '')
+               .replace(/\s*-\s*(Korean|Japanese|Asian|Skincare|Skin\s+Care|Online|Beauty|and|&|\s)+$/i, '')
                .replace(/\s+Australia$/i, '')
                .trim();
   }
