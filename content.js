@@ -22,6 +22,14 @@ const icons = {
   externalLink: `<svg viewBox="0 0 24 24"><path d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" /></svg>`
 };
 
+// Unescape HTML entities (e.g. &amp; -> &)
+function unescapeHTML(str) {
+  if (!str) return "";
+  const temp = document.createElement("div");
+  temp.innerHTML = str;
+  return temp.textContent || temp.innerText || "";
+}
+
 // Check if page contains Shopify metadata or matches product URL
 function isProductPage() {
   return window.location.pathname.includes("/products/") || !!document.querySelector('meta[property="og:type"][content="product"]');
@@ -88,6 +96,10 @@ function getProductDetails() {
     name = titleMeta ? titleMeta.content : document.title;
   }
 
+  // Unescape brand and name first (e.g. "Geek &amp; Gorgeous" -> "Geek & Gorgeous")
+  brand = unescapeHTML(brand);
+  name = unescapeHTML(name);
+
   // Clean name format if it contains shop descriptions
   if (name) {
     name = name.replace(/^Buy\s+/i, '')
@@ -96,14 +108,15 @@ function getProductDetails() {
                .trim();
   }
 
-  // Clean volume tags from name (e.g. 85g, 150ml) to improve INCIDecoder search success
+  // Clean volume tags and special characters from cleanName
   let cleanName = name;
   if (cleanName) {
     cleanName = cleanName.replace(/\b\d+(g|ml|oz|pcs|pack|pieces)\b/gi, '').trim();
     if (brand && cleanName.toLowerCase().startsWith(brand.toLowerCase())) {
       cleanName = cleanName.substring(brand.length).trim();
     }
-    cleanName = cleanName.replace(/[&|#|\\/|(|)|[|\]]/g, ' ').replace(/\s+/g, ' ').trim();
+    // Clean brackets and hashtags, but keep & symbol
+    cleanName = cleanName.replace(/[#|\\/|(|)|[|\]]/g, ' ').replace(/\s+/g, ' ').trim();
   }
 
   return {
@@ -696,8 +709,8 @@ function processSearchResponse(response) {
       const titleEl = doc.querySelector("h1 div.klavikab, span#product-title");
       const brandEl = doc.querySelector("span#product-brand-title a");
       
-      const parsedBrand = brandEl ? brandEl.innerText.trim() : state.brand;
-      const parsedName = titleEl ? titleEl.innerText.trim() : state.productName;
+      const parsedBrand = unescapeHTML(brandEl ? brandEl.innerText.trim() : state.brand);
+      const parsedName = unescapeHTML(titleEl ? titleEl.innerText.trim() : state.productName);
       
       updateSidebarHeader(parsedBrand, parsedName);
       renderSidebarData();
@@ -709,7 +722,17 @@ function processSearchResponse(response) {
     // Check if we have search results link
     const parser = new DOMParser();
     const doc = parser.parseFromString(response.html, "text/html");
-    const firstResultLink = doc.querySelector("a.simpletextlistitem, a[href^='/products/']");
+    
+    // Find the first valid product link, avoiding system links like /products/create
+    let firstResultLink = null;
+    const links = doc.querySelectorAll("a.simpletextlistitem, a[href^='/products/']");
+    for (const link of links) {
+      const href = link.getAttribute("href");
+      if (href && href !== "/products/create" && href !== "/products/new" && !link.classList.contains("topmenu")) {
+        firstResultLink = link;
+        break;
+      }
+    }
     
     if (firstResultLink) {
       const productHref = firstResultLink.getAttribute("href");
@@ -735,8 +758,8 @@ function processSearchResponse(response) {
           const titleEl = innerDoc.querySelector("h1 div.klavikab, span#product-title");
           const brandEl = innerDoc.querySelector("span#product-brand-title a");
           
-          const parsedBrand = brandEl ? brandEl.innerText.trim() : state.brand;
-          const parsedName = titleEl ? titleEl.innerText.trim() : state.productName;
+          const parsedBrand = unescapeHTML(brandEl ? brandEl.innerText.trim() : state.brand);
+          const parsedName = unescapeHTML(titleEl ? titleEl.innerText.trim() : state.productName);
           
           updateSidebarHeader(parsedBrand, parsedName);
           renderSidebarData();
